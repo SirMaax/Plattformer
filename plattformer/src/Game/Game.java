@@ -146,6 +146,12 @@ public int[] getNextPos2 (Rectangle rec, int x, int y, int oldX, int oldY) {
 		int objectY = object.getPosition().getY();
 		int objectX = object.getPosition().getX();
 		
+		
+		double[] temp = vectorSchnittpunkt(oldX, oldY, x, y, objectX , objectY, objectX , objectY + object.getSize().getHeight());
+		if(temp[0] < x && temp[0] > oldX && temp[1] < y && temp[1] > oldY) {
+			//intersects
+		}
+		
 		//Movement to right
 		if (oldX < x && oldY < objectY + object.getSize().getHeight() && oldY > objectY ) {
 			double[] temp = vectorSchnittpunkt(oldX, oldY, x, y, objectX , objectY, objectX , objectY + object.getSize().getHeight());
@@ -197,8 +203,10 @@ public int[] getNextPos2 (Rectangle rec, int x, int y, int oldX, int oldY) {
 		dX = dX - cX;
 		dY = dY - cY;
 		if(dY == 0) {
-			double x = (cY - aY) / bY;								
-			return new double[] {(aX + bX * x ),(aY + bY * x)};
+			double preX = (cY - aY) / bY;			
+			double x = aX + bX * preX;
+			double y = aY + bY * preX;
+			return new double[] {(aX + bX * preX ),(aY + bY * preX)};
 		}
 		
 		double y1 = (aY - cY) / dY;
@@ -208,6 +216,10 @@ public int[] getNextPos2 (Rectangle rec, int x, int y, int oldX, int oldY) {
 		
 		double x = aX + bX * preX ;
 		double y = aY + bY * preX ;
+		
+		if( x < bX && x > aX) {
+			//Intersects
+		}
 		
 		return new double[] {x,y};
 	}
