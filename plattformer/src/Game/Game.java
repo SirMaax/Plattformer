@@ -23,7 +23,7 @@ public class Game extends Canvas {
 	public int HEIGHT;
 	
 	private Window window;
-	private GameLoop loop;
+	
 	private Input input;
 	private cube player;
 	private ArrayList<GameObject> gameObjects;
@@ -37,14 +37,14 @@ public class Game extends Canvas {
 		
 		
 		gameObjects = new ArrayList<GameObject>();
-		player = new cube(1,500,50,25,new PlayerController(input),this);
+		player = new cube(50,500,50,25,new PlayerController(input),this);
 		gameObjects.add(player);
 		gameObjects.add(new Plattform(1, 1060, 50, 1920)); 
-		gameObjects.add(new Plattform(1, 1, 5, 1920)); 
-		gameObjects.add(new Plattform(WIDTH-6, 1, 1080, 5)); 
-		gameObjects.add(new Plattform(1, 1, 1080, 5)); 
-		gameObjects.add(new Plattform(550, 750, 50, 1920));
-		gameObjects.add(new Plattform(550, 450, 1000, 5)); 
+//		gameObjects.add(new Plattform(1, 1, 5, 1920)); 
+//		gameObjects.add(new Plattform(WIDTH-6, 1, 1080, 5)); 
+//		gameObjects.add(new Plattform(1, 1, 1080, 5)); 
+		gameObjects.add(new Plattform(550, 650, 200,3500));
+//		gameObjects.add(new Plattform(550, 450, 1000, 5)); 
 		this.HEIGHT = 1080;
 	}
 	//Transfers GameLoop ref to Input
@@ -125,18 +125,7 @@ public class Game extends Canvas {
 public int[] getNextPos2 (Rectangle rec, int x, int y, int oldX, int oldY) {
 	ArrayList<GameObject> tempList = new ArrayList<GameObject>();	
 		
-	for(int i = 0; i < gameObjects.size(); i++) {
-		GameObject temp = gameObjects.get(i);
-		if(temp != player) {
-			
-			if(rec.intersects(temp.getBounds()))
-			{
-				tempList.add(temp);
-			}
-			
-		}
-		
-	}
+	
 	//CASE 1
 	
 	//CASE 2 1 intersection
@@ -145,56 +134,76 @@ public int[] getNextPos2 (Rectangle rec, int x, int y, int oldX, int oldY) {
 		
 		int objectY = object.getPosition().getY();
 		int objectX = object.getPosition().getX();
-		
-		
-		double[] temp = vectorSchnittpunkt(oldX, oldY, x, y, objectX , objectY, objectX , objectY + object.getSize().getHeight());
-		if(temp[0] < x && temp[0] > oldX && temp[1] < y && temp[1] > oldY) {
-			//intersects
-		}
-		
-		//Movement to right
-		if (oldX < x && oldY < objectY + object.getSize().getHeight() && oldY > objectY ) {
-			double[] temp = vectorSchnittpunkt(oldX, oldY, x, y, objectX , objectY, objectX , objectY + object.getSize().getHeight());
-			System.out.println("Right");
-			return new int[] {1, (int )temp[0], (int )temp[1],0};
-		}
-		
-		//Movement to left
-		if ( oldX > x && oldY > objectY && oldY < object.getSize().getHeight() ) {
-			double[] temp = vectorSchnittpunkt(oldX, oldY, x, y, objectX + object.getSize().getWidth()  , objectY , objectX + object.getSize().getWidth(), objectY + object.getSize().getHeight());
-			System.out.println("Left");
-			return new int[] {1, (int )temp[0], (int )temp[1],0};
-		}
-		
-		//Movement down
-		if ( oldY < y && oldX > objectX && oldX < object.getSize().getWidth() ) {
-			double[] temp = vectorSchnittpunkt(oldX, oldY, x, y, objectX, objectY, objectX + object.getSize().getWidth(), objectY) ;
-			System.out.println("Move down");
-			return new int[] {1, (int )temp[0] - player.getSize().getHeight(), (int )temp[1],0};
 			
+			
+			double[] tempLeft = null;
+			double[] tempRight = null;
+ 		
+			double[] tempDown = vectorSchnittpunkt(oldX, oldY, x, y, objectX , objectY, objectX + object.getSize().getWidth(), objectY);
+			double[] tempUp = vectorSchnittpunkt(oldX, oldY, x, y, objectX  , objectY + object.getSize().getHeight(), objectX + object.getSize().getWidth(), objectY + object.getSize().getHeight());
+			
+			if(oldX - x != 0) {
+			 tempLeft = vectorSchnittpunkt(oldX, oldY, x, y, objectX, objectY, objectX , objectY + object.getSize().getHeight()) ;
+			 tempRight = vectorSchnittpunkt(oldX + 50, oldY, x, y, objectX + object.getSize().getWidth(), objectY, objectX + object.getSize().getWidth(), objectY + object.getSize().getHeight()) ;
+			}else {
+				tempLeft = new double[] {5000,5000};
+				tempRight = new double[] {5000,5000};					
+			}
+			for(double ele : tempDown) {
+				System.out.println("Down " + ele);
+			}
+			for(double ele : tempUp) {
+				System.out.println("UP " + ele);
+			}
+			;
+			for(double ele : tempLeft) {
+				System.out.println("Left " + ele);
+			}
+			;
+			for(double ele : tempRight) {
+				System.out.println("Right " + ele);
+			}
+			System.out.println("oldX: " + oldX);
+			System.out.println("newX: " + x);
+			System.out.println("oldY: " + oldY);
+			System.out.println("newY: " + y);
+			int newX = (int) returnSmallest ( new double[] {tempDown[0],  tempUp[0], tempLeft[0], tempRight[0]}, x - player.getSize().getWidth(),x + player.getSize().getWidth(), oldX );
+			int newY = (int) returnSmallest ( new double[] {tempDown[1],  tempUp[1], tempLeft[1], tempRight[1]}, y - player.getSize().getHeight(),y + player.getSize().getHeight(), oldY);
+			System.out.println(newX);
+			System.out.println(newY);
+			System.out.println("---------");
+			if(newY == tempDown[1]  ) {
+				return new int[] {1, x, (int) (newY - rec.getHeight())};
+			} 
+			if(newY == tempUp[1]  ) {
+				return new int[] {1,  (int) tempDown[0], (int) (newY)};
+				
+			}
+			else if (newY == tempUp[1] && newX == tempRight[0] ) {
+				return new int[] {1, newX, (int) (newY + object.getSize().getHeight())};
+			}
+			else if (newY == tempUp[1] && newX == tempLeft[0] ) {
+				return new int[] {1, newX, (int) (newY + object.getSize().getHeight())};
+			}
+			//Left
+			else if (newX == tempLeft[0] && oldY <= y ) {
+				return new int[] {1, newX - player.getSize().getWidth(), (int) (y)};
+			}
+			else if (newX == tempLeft[0] && oldY > y ) {
+				return new int[] {1, newX - player.getSize().getWidth(), (int) (y)};
+			}
+			//RIght
+			else if (newX == tempRight[0] && oldY <= y ) {
+				return new int[] {1, newX , (int) (tempRight[1])};
+			}
+			else if (newX == tempRight[0] && oldY > y ) {
+				return new int[] {1, newX , (int) (tempRight[1])};
+			}
 		}
-		
-		//Movement up
-		if ( oldY > y && oldX > objectX && oldX < object.getSize().getWidth() ) {
-			double[] temp = vectorSchnittpunkt(oldX, oldY, x, y, objectX, objectY + object.getSize().getHeight(), objectX + object.getSize().getWidth(), objectY + object.getSize().getHeight());
-			System.out.println("Up");
-			return new int[] {1, (int )temp[0], (int )temp[1],0};
-		}
-	}
-	System.out.println("Nothing");
-	return new int[] {1,x,y};
-	
-	
+	return new int[] {0, x, y};
 	}
 	
-	public boolean checkTouchWallFromSide(int y, int oldY, GameObject object, int objectY) {
-		if((y > objectY && y < objectY+object.getSize().getHeight()) 
-			&& (oldY > objectY && oldY < objectY+object.getSize().getHeight()))
-		{
-			return true;
-		}
-		return false;
-	}
+
 	
 	public static double[] vectorSchnittpunkt (double aX, double aY, double bX, double bY, double cX, double cY, double dX, double dY) {
 		
@@ -204,8 +213,6 @@ public int[] getNextPos2 (Rectangle rec, int x, int y, int oldX, int oldY) {
 		dY = dY - cY;
 		if(dY == 0) {
 			double preX = (cY - aY) / bY;			
-			double x = aX + bX * preX;
-			double y = aY + bY * preX;
 			return new double[] {(aX + bX * preX ),(aY + bY * preX)};
 		}
 		
@@ -217,12 +224,135 @@ public int[] getNextPos2 (Rectangle rec, int x, int y, int oldX, int oldY) {
 		double x = aX + bX * preX ;
 		double y = aY + bY * preX ;
 		
-		if( x < bX && x > aX) {
-			//Intersects
-		}
+		
 		
 		return new double[] {x,y};
 	}
+	public static double returnSmallest (double[] a, double x,double x2, double oldX) {
+		double result = 0;
+		for(int i = 0 ; i < 4; i++) {
+			if(( a[i] >= oldX && (a[i] <= x || a[i] <=x2) ) || ((a[i] >= x || a[i] >= x2) && a[i] <= oldX)){
+				result = a[i];
+			}
+		}
+		
+		double j = 1;
+		if(result >= x)j = -1;
+		
+		for(int i = 0; i < a.length; i++) {
+			if((x - result)*j > (x - a[i] )*j) {
+				if(( a[i] > oldX && a[i] < x ) || (a[i] < x && a[i] > oldX))
+				result =  a[i];
+			}
+		}		
+		return result;
+	}
+	//CHECKS IF A RECTANGLE INTERSECTS WITH ANOTHER RECTANGLE (NEVER CHECKS IF PLAYER IS INTERSECTING)
+	public GameObject[] checkInterSect(Rectangle rec, int x, int y, int oldX, int oldY) {
+		ArrayList<GameObject> tempList = new ArrayList<GameObject>();	
+		for(int i = 0; i < gameObjects.size(); i++) {
+			GameObject temp = gameObjects.get(i);
+			if(temp != player) {
+				
+				if(rec.intersects(temp.getBounds()))
+				{
+					tempList.add(temp);
+				}
+				
+			}
+			
+		}
+		if(tempList.size() == 0)return null;
+		
+		GameObject[] result = new GameObject[tempList.size()];
+		
+		for(int i = 0; i < tempList.size() ; i++) {
+			result[i] = tempList.get(i);
+		}	
+		
+		return result;
+	}
 	
-	
+	//GIVES THE NEXT POSITION FOR AN ENTITY 
+	public int[] getNextPos3 (Rectangle rec ,int x, int y, int oldX, int oldY) {
+		//CASES 1-4 : 1 = UPPER SIDE, 2 = DOWN SIDE, 3 = LEFT SIDE, 4 = RIGHT SIDE
+		//CASES 5-8 : 5 = LEFT UP, 6 = LEFT RIGHT, 7 = RIGHT UP, 8 = RIGHT DOWN
+		
+		GameObject[] objects = checkInterSect(rec, x, y, oldX, oldY);
+		
+		//WHEN PLAYER IS NOT Intersecting
+		if(objects == null) return new int[] {0, x, y};
+
+		int objectX = objects[0].getPosition().getX();
+		int objectY = objects[0].getPosition().getY();
+		int objectYHeight = objects[0].getSize().getHeight();
+		int objectYWIDTH = objects[0].getSize().getWidth();
+		
+		int playerHeight = player.getSize().getHeight();
+		int playerWidth = player.getSize().getWidth();
+		
+		if(oldY <= y && oldX == x) {
+			//CASE 1
+			return new int[] {1, x  , objectY - playerHeight};
+		}else if(oldY >= y && oldX == x) {
+			//CASE 2
+			return new int[] {1, x , objectY + objectYHeight};
+		}else if(oldX <= x && oldY == y) {
+			//CASE 3
+			return new int[] {2, objectX - playerWidth, y};
+		}else if(oldX >= x && oldY == y) {
+			//CASE 4
+			return new int[] {1, objectX + objectYWIDTH , y};
+		}else if(oldX <= x && oldY <= y) {		
+			//CASE 5
+			if( (x - objectX) <= (y - objectY ) ) {
+				//SIDE 3
+				return new int[] {2, objectX - playerWidth , y};
+			}else {
+				//SIDE 1
+				return new int[] {1, x , objectY - playerHeight};
+			}
+		}else if(oldX <= x && oldY >= y) {		
+			//CASE 6
+			if( (x - objectX) <= (objectY + objectYHeight - y ) )  {
+				//SIDE 3
+				return new int[] {2, objectX - playerWidth , y};
+			}else {
+				//SIDE 2
+				return new int[] {1, x , objectY + objectYHeight};
+			}
+		}else if(oldX >= x && oldY <= y) {		
+			//CASE 7
+			if( (objectX + objectYWIDTH - x) <= (y - objectY) ) {
+				//SIDE 4
+				return new int[] {1, objectX + objectYWIDTH , y};
+			}else {
+				//SIDE 1
+				return new int[] {1, x , objectY - playerHeight};
+			}
+		}else if(oldX >= x && oldY >= y) {		
+			//CASE 8
+			if( ( objectX + objectYWIDTH - x) <= (y - objectY + objectYHeight) ) {
+				//SIDE 4
+				return new int[] {1, objectX + objectYWIDTH , y};
+			}else {
+				//SIDE 2
+				return new int[] {1, x , objectY + objectYHeight};
+			}
+		}
+		return new int[] {0, 0, 0};
+		
+		
+		
+	}
+
+
+	public int min(int a, int b) {
+		if(a <= b)return b;
+		return b;
+	}
+
+
+
+
 }

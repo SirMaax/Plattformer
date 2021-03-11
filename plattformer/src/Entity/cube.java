@@ -73,7 +73,8 @@ public class cube extends GameObject {
 		int tempX = game.clampX(position.getX() + deltaX ,size.getWidth());
 		int tempY = game.clampY(position.getY() + deltaY ,size.getHeight());
 		
-		int[] pos = game.getNextPos2(new Rectangle(tempX, tempY,size.getWidth(),size.getHeight()),tempX, tempY, position.getX(), position.getY());
+		
+		int[] pos = game.getNextPos3(new Rectangle(tempX, tempY,size.getWidth(),size.getHeight()), tempX, tempY, position.getX(), position.getY());
 		
 		if(pos[0] == 0) {
 			
@@ -81,6 +82,7 @@ public class cube extends GameObject {
 		else if(pos[0] == 1) {
 			grounded = true;
 			gravityUpdateRate = 25;
+			deltaY = 0;
 			
 		}else if (pos[0] == 2) {
 			onWall = true;

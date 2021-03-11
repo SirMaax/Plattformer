@@ -128,11 +128,12 @@ public class Window extends JFrame{
 	public void renderInfo(Graphics g, GameObject object) {
 		g.setColor(Color.WHITE);
 		g.drawString("SpeedX: " + object.getDeltaX(), 50, 50);
-		g.drawString("y Cord: " + object.getSomeValue()[2], 50, 70);
+//		g.drawString("y Cord: " + object.getSomeValue()[2], 50, 70);
 		g.drawString("X Cord: " + object.getSomeValue()[3], 50, 90);
 		g.drawString("SpeedY: " + object.getDeltaY(), 150, 50);
 		g.drawString("GRate: " + object.getSomeValue()[0], 250, 50);
 		g.drawString("JumpDur: " + object.getSomeValue()[1], 350, 50);	
+		g.drawString("New y CO: " + object.getPosition().getY(), 50, 70);
 		
 		Rectangle r = new Rectangle(0,0,25,25);
 		Rectangle s = new Rectangle(0,0,25,25);
